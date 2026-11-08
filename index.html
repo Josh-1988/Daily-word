@@ -256,7 +256,7 @@ body.dark .back{color:#9db4e6;}
 <meta name="apple-mobile-web-app-title" content="The Word">
 <meta name="description" content="The word with Joshua Kakaire - a daily devotional for 2026 with a Bible reader, search and sharing.">
 <meta property="og:title" content="The word with Joshua Kakaire">
-<meta property="og:description" content="A daily devotional: a verse, a reflection, a confession and further reading, every day of 2026.">
+<meta property="og:description" content="A daily devotional: a verse, a reflection, a confession and further reading for every day of the year.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="icons/icon-512.png">
 <script>
@@ -345,15 +345,16 @@ if ('serviceWorker' in navigator) {
         <div id="reflectionsbox"></div>
     <div id="adminbox"></div>
     <div class="card"><b>About</b><div class="note" style="margin-top:6px">
-      The word with Joshua Kakaire &mdash; a daily devotional for 2026, 2027 and 2028. Each day brings a verse,
+      The word with Joshua Kakaire &mdash; a daily devotional that walks with you through the whole year. Each day brings a verse,
       a reflection, a confession and further reading. Devotions unlock on their date;
       today&rsquo;s is always on the home screen.</div></div>
     <div class="card"><b>Sharing</b><div class="note" style="margin-top:6px">
       Devotions may be shared in full and unchanged, with the author&rsquo;s name attached.
       Copying, editing and downloading are switched off for readers.</div></div>
-    <div class="card"><b>Install on your phone</b><div class="note" style="margin-top:6px">
-      Open this file in your browser, then choose &ldquo;Add to Home screen&rdquo; from the browser menu.
-      It will open like an app.</div></div>
+    <div class="card"><b>Install this app</b>
+      <div class="note" style="margin-top:6px" id="installnote">Install The Word on your phone, tablet or computer. It opens like a normal app, full-screen, and works offline once installed.</div>
+      <button class="btn warm" id="installbtn" style="display:none;margin-top:10px" onclick="doInstall()">&#11015; Install The Word</button>
+      <div class="note" id="installhelp" style="margin-top:10px;line-height:1.7"></div></div>
   </section>
 
 </div>
@@ -689,6 +690,23 @@ function openPassage(ref, _noPush){ if(!_noPush)_pushHist(); window.__CURREF__ =
 }
 
 /* ---------- search ---------- */
+/* ---------- install the app (phone / tablet / computer) ---------- */
+var _deferredPrompt=null;
+window.addEventListener('beforeinstallprompt', function(ev){ ev.preventDefault(); _deferredPrompt=ev; var b=document.getElementById('installbtn'); if(b)b.style.display=''; renderInstallHelp(); });
+window.addEventListener('appinstalled', function(){ _deferredPrompt=null; var b=document.getElementById('installbtn'); if(b)b.style.display='none'; var n=document.getElementById('installnote'); if(n)n.textContent='Installed. Open The Word from your home screen or apps list.'; var hp=document.getElementById('installhelp'); if(hp)hp.innerHTML=''; });
+function doInstall(){ if(!_deferredPrompt)return; _deferredPrompt.prompt(); _deferredPrompt.userChoice.then(function(){ _deferredPrompt=null; var b=document.getElementById('installbtn'); if(b)b.style.display='none'; }).catch(function(){}); }
+function _standaloneApp(){ try{ return (window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true; }catch(e){ return false; } }
+function renderInstallHelp(){
+  var hp=document.getElementById('installhelp'); if(!hp)return;
+  var ua=navigator.userAgent||'';
+  var isIOS=/iPhone|iPad|iPod/i.test(ua)||(/Macintosh/i.test(ua)&&'ontouchend' in document);
+  var btn=document.getElementById('installbtn'), note=document.getElementById('installnote');
+  if(_standaloneApp()){ if(note)note.textContent='You are using the installed app.'; if(btn)btn.style.display='none'; hp.innerHTML=''; return; }
+  if(_deferredPrompt){ if(btn)btn.style.display=''; hp.innerHTML='Tap <b>Install The Word</b> above. On a computer you can also click the install icon at the right of the address bar.'; return; }
+  if(isIOS){ hp.innerHTML='<b>On iPhone &amp; iPad:</b> in Safari, tap the <b>Share</b> button (the square with an arrow pointing up), then choose <b>“Add to Home Screen”</b>.'; return; }
+  hp.innerHTML='<b>On Android:</b> tap the browser’s <b>⋮</b> menu, then <b>“Install app”</b> or <b>“Add to Home screen”</b>.<br><b>On a computer (Chrome or Edge):</b> click the <b>install icon</b> at the right of the address bar, or the <b>⋮</b> menu → <b>“Install”</b>.';
+}
+
 /* ---------- encouragement finder: find a word for what you need ---------- */
 var NEEDS = [
   {label:'Fear & anxiety', keys:['fear','afraid','anxious','anxiety','worry','worried','terror','dread','panic','courage','courageous','fearful'],
@@ -1129,7 +1147,7 @@ function renderSideFoot(){
     readSet().length + ' of ' + DEVOS.length + ' read<br><span style="opacity:.7">Press / to search</span>';
 }
 renderSideFoot();
-applyPrefs(); renderSettings(); setTimeout(renderOffline, 0); renderHome(); renderDevos(); buildBibleUI(); renderBibleHome(); renderAdmin(); runSearch(''); renderNeeds();
+applyPrefs(); renderSettings(); setTimeout(renderOffline, 0); renderHome(); renderDevos(); buildBibleUI(); renderBibleHome(); renderAdmin(); runSearch(''); renderNeeds(); renderInstallHelp();
 document.getElementById('devofilter').addEventListener('input', function(){ renderDevos(this.value); });
 document.getElementById('q').addEventListener('input', function(){ runSearch(this.value); });
 document.getElementById('ver').addEventListener('change', function(){ loadChapter(); });
